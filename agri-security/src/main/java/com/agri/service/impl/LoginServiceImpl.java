@@ -1,5 +1,6 @@
 package com.agri.service.impl;
 
+import com.agri.filter.jwtfilter.RenewalJwtHandler;
 import com.agri.security.model.LoginUser;
 import com.agri.service.LoginService;
 import com.agri.utils.JwtUtil;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
 @Service(value = "loginServiceImpl")
@@ -37,18 +39,21 @@ public class LoginServiceImpl implements LoginService {
 
         // 存儲redis
         redisUtil.set(id, loginUser);
+        redisUtil.set(jwt, jwt, RenewalJwtHandler.DEFAULT_EXPIRE_TIME);
 
         return jwt;
     }
 
     @Override
-    public String logtout() {
+    public String logtout(HttpServletRequest request) {
         //獲取securityContextHolder中的用戶id
         UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         long userid = loginUser.getUser().getUserid();
         //刪除redis中的值
         redisUtil.del("" + userid);
+        String token = request.getHeader("Authorization");
+        redisUtil.del(token);
         return "註銷成功";
     }
 }

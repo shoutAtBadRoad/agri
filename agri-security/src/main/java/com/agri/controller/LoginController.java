@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class LoginController {
     }
 
     @PostMapping("/user/logout")
-    public String logout() {
-        return loginService.logtout();
+    public String logout(HttpServletRequest request) {
+        return loginService.logtout(request);
     }
 }

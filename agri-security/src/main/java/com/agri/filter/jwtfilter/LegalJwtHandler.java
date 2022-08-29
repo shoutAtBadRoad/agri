@@ -1,0 +1,28 @@
+package com.agri.filter.jwtfilter;
+
+import com.agri.utils.JwtUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Order(0)
+@Slf4j
+public class LegalJwtHandler implements IJwtHandler{
+    @Override
+    public Claims check(String token, Claims claims, JwtFilterChain chain) {
+        try {
+            claims = JwtUtil.parseJWT(token);
+        }catch (ExpiredJwtException e) {
+            claims = e.getClaims();
+            log.info("token过期，但是合法");
+        }catch (Exception e) {
+            log.info("token非法");
+            return null;
+        }
+        log.info("token合法");
+        return chain.doCheck(token, claims);
+    }
+}

@@ -1,5 +1,6 @@
 package com.agri.filter;
 
+import com.agri.filter.jwtfilter.JwtFilterChain;
 import com.agri.security.model.LoginUser;
 import com.agri.utils.JwtUtil;
 import com.agri.utils.RedisUtil;
@@ -24,6 +25,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    JwtFilterChain chain;
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
@@ -36,18 +39,24 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         }
         // 解析token
         String userid = null;
-        try{
-            Claims claims = JwtUtil.parseJWT(token);
-            userid = claims.getSubject();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        // 從redis獲取用戶信息
-        String redisKey = userid;
-        Object o = redisUtil.get(redisKey);
-        if(Objects.isNull(o)) {
+//        try{
+//            Claims claims = JwtUtil.parseJWT(token);
+//            userid = claims.getSubject();
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        // 從redis獲取用戶信息
+//        String redisKey = userid;
+//        Object o = redisUtil.get(redisKey);
+//        if(Objects.isNull(o)) {
+//            throw new RuntimeException("用戶未登錄");
+//        }
+        Claims claims = chain.doCheck(token, null);
+        if(claims == null) {
             throw new RuntimeException("用戶未登錄");
         }
+        userid = claims.getSubject();
+        Object o = redisUtil.get(userid);
         LoginUser loginUser = JSON.parseObject(o.toString(), LoginUser.class);
         // 存入SecurityContextHolder
         //TODO 獲取權限信息封裝到Authentication
