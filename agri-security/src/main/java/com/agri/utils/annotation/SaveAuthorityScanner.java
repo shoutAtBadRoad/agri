@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-@Component
 @Log4j
 public class SaveAuthorityScanner  implements BeanPostProcessor {
 
