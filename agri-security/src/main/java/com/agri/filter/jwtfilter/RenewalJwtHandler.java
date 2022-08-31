@@ -19,11 +19,11 @@ public class RenewalJwtHandler implements IJwtHandler{
     private RedisUtil redisUtil;
 
     @Override
-    public Claims check(String token, Claims claims, JwtFilterChain chain) {
+    public Claims check(String token, Claims claims, JwtFilterChain chain, String id) {
         String subject = (String) claims.get("subject");
         String newToken = JwtUtil.createJWT(subject);
         redisUtil.set(token, newToken, DEFAULT_EXPIRE_TIME);
         log.info(token + "已经刷新");
-        return chain.doCheck(token, claims);
+        return chain.doCheck(token, claims, id);
     }
 }

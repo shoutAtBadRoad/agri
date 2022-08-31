@@ -19,11 +19,12 @@ public class ExpireJwtHandler implements IJwtHandler{
     private RedisUtil redisUtil;
 
     @Override
-    public Claims check(String token, Claims claims, JwtFilterChain chain) {
+    public Claims check(String token, Claims claims, JwtFilterChain chain, String id) {
         String val = (String) redisUtil.get(token);
         if(StringUtils.isEmpty(val)) {
             // 长时间没有操作，token 已经失效
             log.info("用户未登陆或已经自动离线");
+            chain.index.remove();
             return null;
         }
         try {
@@ -31,8 +32,9 @@ public class ExpireJwtHandler implements IJwtHandler{
         }catch (ExpiredJwtException e) {
             claims = e.getClaims();
             log.info("token需要续期");
-            return chain.doCheck(token, claims);
+            return chain.doCheck(token, claims, id);
         }
+        chain.index.remove();
         return claims;
     }
 }

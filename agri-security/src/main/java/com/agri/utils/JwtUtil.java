@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class JwtUtil {
 
-    private static final long DEFAULT_EXPIRE_TIME = 3600*1000;
+    public static final long DEFAULT_EXPIRE_TIME = 3600*1000*3;
 
     private static final String SECRET = "hubor";
 

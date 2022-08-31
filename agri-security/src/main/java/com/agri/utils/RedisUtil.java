@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  *
- * @author yangaliang
+ * @author jyp
  * 基于spring和redis的redisTemplate工具类
  * 针对所有的hash 都是以h开头的方法
  * 针对所有的Set 都是以s开头的方法
@@ -89,9 +89,10 @@ public class RedisUtil<T> {
      * @param key 键
      * @return 值
      */
-    public <T> T get(String key){
+    public T get(String key){
         ValueOperations<Object, Object> ops = redisTemplate.opsForValue();
-        return (T) ops.get(key);
+        Object o = ops.get(key);
+        return (T) o;
     }
 
     /**
