@@ -60,7 +60,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/v2/*").permitAll()
                 .antMatchers("/csrf").permitAll()
                 .antMatchers("/").permitAll()
-//                .antMatchers("/login").permitAll()
+                .antMatchers("/auth/apiAuth").permitAll()
+                .antMatchers("/sysUser/aes").permitAll()
                 .anyRequest().authenticated();
 
         //添加過濾器

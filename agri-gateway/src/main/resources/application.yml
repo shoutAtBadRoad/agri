@@ -17,8 +17,14 @@ spring:
             - Path=/security/**
           filters:
             - StripPrefix=1 # 断言前缀取消的层数
+      discovery:
+        locator:
+          enabled: false
     nacos:
       discovery:
         server-addr: localhost:8848
-
+ignore:
+  urls:
+    - "/user/login"
+    - "/*/white/test"
 

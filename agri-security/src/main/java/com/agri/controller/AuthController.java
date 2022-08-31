@@ -5,6 +5,7 @@ import com.agri.model.ResultStatus;
 import com.agri.security.model.LoginUser;
 import com.agri.service.PermsRolesService;
 import com.agri.utils.RedisUtil;
+import com.agri.utils.annotation.SaveAuth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ public class AuthController {
      * @return
      */
     @PostMapping("/apiAuth")
+    @SaveAuth
     public ResultSet<Boolean> authenticationApi(HttpServletRequest request, @RequestParam("uri")String uri) {
         // 拿到用户信息
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
