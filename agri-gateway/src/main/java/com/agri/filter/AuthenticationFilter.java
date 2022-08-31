@@ -20,11 +20,14 @@ import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.RequestPath;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
@@ -48,6 +51,7 @@ public class AuthenticationFilter implements GlobalFilter{
 //        String originalUri = (uris.isEmpty()) ? "Unknown" : uris.iterator().next().toString();
         String originalUri = exchange.getRequest().getURI().getPath();
         URI routeUri = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR);
+        ServerHttpResponse response = exchange.getResponse();
 //        log.info("Incoming request " + originalUri + " is routed to id: " + route.getId()
 //                + ", uri:" + routeUri);
         //TODO url白名单校验
@@ -59,7 +63,12 @@ public class AuthenticationFilter implements GlobalFilter{
         String token = exchange.getRequest().getHeaders().getFirst("Authorization");
         if(StringUtils.isEmpty(token)) {
             log.info("无用户凭证");
-            return Mono.empty();
+            ResultSet<String> error = ResultSet.error("无用户凭证");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("body", error);
+            byte[] bytes = jsonObject.toJSONString().getBytes();
+            DataBuffer buffer = response.bufferFactory().wrap(bytes);
+            return response.writeWith(Mono.just(buffer));
         }
         String authenticated = authService.verifyAuthentication(token, routeUri.getPath());
         //TODO 如果未认证通过
@@ -67,12 +76,22 @@ public class AuthenticationFilter implements GlobalFilter{
         int code = resultSet.getCode();
         if(code == ResultStatus.AUTHORITY.getCode()) {
             log.info("用户无效凭证");
-            return Mono.empty();
+            ResultSet<String> error = ResultSet.error("无效凭证");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("body", error);
+            byte[] bytes = jsonObject.toJSONString().getBytes();
+            DataBuffer buffer = response.bufferFactory().wrap(bytes);
+            return response.writeWith(Mono.just(buffer));
         }
         Boolean b = (Boolean)resultSet.getBody();
         if(!b) {
             log.info("用户无权限");
-            return Mono.empty();
+            ResultSet<String> error = ResultSet.error("用户无权限");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("body", error);
+            byte[] bytes = jsonObject.toJSONString().getBytes();
+            DataBuffer buffer = response.bufferFactory().wrap(bytes);
+            return response.writeWith(Mono.just(buffer));
         }
         return chain.filter(exchange);
     }

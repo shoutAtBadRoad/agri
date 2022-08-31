@@ -1,6 +1,10 @@
 package com.agri.handler;
 
+import com.agri.model.ResultSet;
+import com.agri.model.ResultStatus;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.nacos.shaded.com.google.gson.JsonObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -19,12 +23,8 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         // 處理異常
-        Map<String, Object> map = new HashMap<>();
-        map.put("status", HttpStatus.UNAUTHORIZED);
-        map.put("code", HttpStatus.UNAUTHORIZED.value());
-        map.put("msg", "用戶認證失敗，請重新登陸");
-        String jsonString = JSON.toJSONString(map);
-        renderString(response, jsonString);
+        ResultSet<Object> resultSet = ResultSet.OK(ResultStatus.AUTHORITY, null, "用户认证失败");
+        renderString(response, JSONObject.toJSONString(resultSet));
     }
 
     private void renderString(HttpServletResponse response, String msg) throws IOException {
