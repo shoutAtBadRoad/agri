@@ -2,6 +2,7 @@ package com.agri.security.service;
 
 
 import com.agri.mapper.MenuMapper;
+import com.agri.mapper.SysUserRoleMapper;
 import com.agri.mapper.UserMapper;
 import com.agri.model.User;
 import com.agri.security.model.LoginUser;
@@ -21,8 +22,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Resource
     private UserMapper userMapper;
 
+
     @Resource
-    private MenuMapper menuMapper;
+    private SysUserRoleMapper sysUserRoleMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -31,8 +33,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new RuntimeException("用戶名或密碼錯誤");
         }
 
-        //TODO 檢查權限信息
-        List<String> list = menuMapper.selectPermsByUserId(user.getUserid());
+        // 檢查權限信息
+        List<String> list = sysUserRoleMapper.getRolesOfUser(user.getUserid());
         LoginUser loginUser = new LoginUser(user, list);
         // 把數據封裝成userDetails返回
         return loginUser;
