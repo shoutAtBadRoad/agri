@@ -3,8 +3,14 @@ package com.agri.service.impl;
 import com.agri.mapper.SysUserRoleMapper;
 import com.agri.model.SysUserRole;
 import com.agri.service.ISysUserRoleService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -17,4 +23,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUserRole> implements ISysUserRoleService {
 
+    @Autowired
+    private SysUserRoleMapper userRoleMapper;
+
+    @Override
+    public List<Map<String, String>> getRolesOfUsers(List<Long> ids, Long cSize, Long cPage) {
+        IPage<SysUserRole> page = new Page<>();
+        Page<Map<String, String>> rolesOfUsers = userRoleMapper.getRolesOfUsers(ids, page);
+        List<Map<String, String>> records = rolesOfUsers.getRecords();
+        return records;
+    }
 }

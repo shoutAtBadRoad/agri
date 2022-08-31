@@ -45,14 +45,20 @@ public class PermsRolesServiceImpl implements PermsRolesService {
     @Override
     public Boolean checkPerms(String uri, List<String> permissions) {
         List<String> rolesList = getRoles(uri);
-        // TODO 权限检查接口
-        if(rolesList == null)
+        // 默认不检查权限
+        if(rolesList.contains("guest"))
             return true;
+        // TODO 权限检查接口
         else {
             Set<String> set = new HashSet<>(permissions);
             set.retainAll(rolesList);
             return set.size() > 0;
         }
+    }
+
+    @Override
+    public void deletePermsOfRolesInRedis() {
+        redisUtil.del(RedisConstant.RESOURCE_ROLES_MAP);
     }
 
     public Map<String, List<String>> refreshPermsMap() {

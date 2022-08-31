@@ -1,6 +1,10 @@
 package com.agri.model;
 
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.github.jeffreyning.mybatisplus.anno.MppMultiId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -21,11 +25,15 @@ public class SysRolePerm implements Serializable {
     /**
      * 角色ID
      */
+    @TableField("role_id")
+    @MppMultiId
     private Long roleId;
 
     /**
      * 权限ID
      */
+    @TableField("perm_id")
+    @MppMultiId
     private Long permId;
 
 

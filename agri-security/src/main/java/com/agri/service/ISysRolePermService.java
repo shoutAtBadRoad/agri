@@ -2,7 +2,10 @@ package com.agri.service;
 
 
 import com.agri.model.SysRolePerm;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.jeffreyning.mybatisplus.service.IMppService;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -12,6 +15,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author jyp
  * @since 2022-08-29
  */
-public interface ISysRolePermService extends IService<SysRolePerm> {
+public interface ISysRolePermService extends IMppService<SysRolePerm> {
+
+    List<Map<String, String >> getPermsOfRoles(List<Long> ids, Long cSize, Long cPage);
 
 }

@@ -2,6 +2,10 @@ package com.agri.model;
 
 import java.time.LocalDateTime;
 import java.io.Serializable;
+
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -22,6 +26,7 @@ public class SysUser implements Serializable {
     /**
      * 主鍵
      */
+    @TableId
     private Long userid;
 
     /**
@@ -71,10 +76,12 @@ public class SysUser implements Serializable {
 
     private Long createBy;
 
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     private Long updateBy;
 
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
     /**

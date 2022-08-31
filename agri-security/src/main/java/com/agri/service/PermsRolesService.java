@@ -11,4 +11,6 @@ public interface PermsRolesService {
 
     Boolean checkPerms(String uri, List<String> permissions);
 
+    void  deletePermsOfRolesInRedis();
+
 }

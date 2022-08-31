@@ -9,4 +9,5 @@ import java.util.Map;
 public interface PermsMapper{
 
     List<Map<String ,String>> getPermsOfRole();
+
 }
