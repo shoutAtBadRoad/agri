@@ -20,6 +20,10 @@ public class ResultSet<T> implements Serializable {
     private String msg;
 
 
+    public static <T> ResultSet<T> OK(T body) {
+        return OK(ResultStatus.OK, body);
+    }
+
     public static <T>  ResultSet<T> OK(ResultStatus status, T body, String message) {
         ResultSet<T> resultSet = new ResultSet<>(status.getCode(), body, message);
         return resultSet;
@@ -27,6 +31,11 @@ public class ResultSet<T> implements Serializable {
 
     public static <T> ResultSet<T> OK(ResultStatus status, T body) {
         return  OK(status, body, null);
+    }
+
+    public static <T>  ResultSet<T> error(T body) {
+        ResultSet<T> resultSet = new ResultSet<>(ResultStatus.ERROR.getCode(), body, null);
+        return resultSet;
     }
 
     public static <T>  ResultSet<T> error(ResultStatus status, T body, String message) {
