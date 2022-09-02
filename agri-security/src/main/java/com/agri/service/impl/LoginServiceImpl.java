@@ -1,17 +1,23 @@
 package com.agri.service.impl;
 
+import com.agri.exception.BeyondLoginTimeException;
 import com.agri.filter.jwtfilter.RenewalJwtHandler;
+import com.agri.model.RedisConstant;
 import com.agri.security.model.LoginUser;
 import com.agri.service.LoginService;
 import com.agri.utils.JwtUtil;
 import com.agri.utils.RedisUtil;
+import com.agri.utils.UriUtil;
 import com.agri.utils.annotation.AESUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -22,6 +28,8 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service(value = "loginServiceImpl")
 public class LoginServiceImpl implements LoginService {
@@ -32,17 +40,35 @@ public class LoginServiceImpl implements LoginService {
     @Autowired
     private RedisUtil redisUtil;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    HttpServletRequest request;
+
     @Override
     public String loginReturnToken(String username, String password) throws NoSuchPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
         //TODO 等前端的密码使用AES加密后，这里的密码就需要解一下密
 //        password = AESUtil.decryptAES(password.getBytes());
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password, null);
-        Authentication authenticate = authenticationManager.authenticate(token);
-
-        if(Objects.isNull(authenticate)) {
-            throw new RuntimeException("登陸失敗");
+        String ipAddress = UriUtil.getIpAddress(request);
+        if(!checkLock(username, ipAddress)) {
+            throw new BeyondLoginTimeException();
         }
-
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password, null);
+        Authentication authenticate;
+        try {
+            authenticate = authenticationManager.authenticate(token);
+        }catch (BadCredentialsException e) {
+            // 抛出用户名密码不正确的异常，告诉前端还有几次重试机会或者账户已经被锁定，几分钟后解锁
+            int leaves = 0;
+            if ((leaves = loginTimesCount(username, ipAddress, false)) > 0) {
+                throw new BeyondLoginTimeException(leaves);
+            } else {
+                throw new BeyondLoginTimeException();
+            }
+        }
+        // 如果登陆成功，把登陆次数锁定删除
+        releaseLock(username, ipAddress);
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         String id = String.valueOf(loginUser.getUser().getUserid());
         String jwt = JwtUtil.createJWT(id);
@@ -53,6 +79,8 @@ public class LoginServiceImpl implements LoginService {
 
         return jwt;
     }
+
+
 
     @Override
     public String logtout(HttpServletRequest request) {
@@ -66,4 +94,39 @@ public class LoginServiceImpl implements LoginService {
         redisUtil.del(token);
         return "註銷成功";
     }
+
+    private void releaseLock(String username, String ipAddress) {
+        String redisKey = ipAddress + RedisConstant.ACCOUNT_LOCK_PREFIX + username;
+        Object key = redisUtil.get(redisKey);
+        if(!Objects.isNull(key)) {
+            redisUtil.del(redisKey);
+        }
+    }
+
+    private boolean checkLock(String username, String ipAddress) {
+        return loginTimesCount(username, ipAddress, true) - RedisConstant.ACCOUNT_RETRY_COUNTS < 0;
+    }
+
+    private int loginTimesCount(String username, String ipAddress, Boolean isCheck) {
+        String redisKey = ipAddress + RedisConstant.ACCOUNT_LOCK_PREFIX + username;
+        Object o = redisUtil.get(redisKey);
+        int val;
+        if(Objects.isNull(o))
+            val = 0;
+        else
+            val = (int) o;
+        if(isCheck) {
+            return val;
+        }
+        if(val == 0) {
+            redisUtil.set(redisKey, ++val, RedisConstant.ACCOUNT_LOCK_TIME);
+        }else {
+            val++;
+            redisTemplate.opsForValue().increment(redisKey);
+            redisUtil.expire(redisKey, RedisConstant.ACCOUNT_LOCK_TIME);
+        }
+        return RedisConstant.ACCOUNT_RETRY_COUNTS - val;
+    }
+
+
 }

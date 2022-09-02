@@ -11,7 +11,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @MapperScan(value = "com.agri.mapper")
 @EnableAspectJAutoProxy
 @EnableMPP
-@EnableSaveAuth
+//@EnableSaveAuth
 public class SecurityApplication {
     public static void main(String[] args) {
         SpringApplication.run(SecurityApplication.class);

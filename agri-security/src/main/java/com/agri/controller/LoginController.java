@@ -2,6 +2,7 @@ package com.agri.controller;
 
 
 
+import com.agri.exception.BeyondLoginTimeException;
 import com.agri.model.ResultSet;
 import com.agri.model.ResultStatus;
 import com.agri.model.User;
@@ -35,7 +36,11 @@ public class LoginController {
             Map<String, String> map = new HashMap<>();
             map.put("token", token);
             return ResultSet.OK(map);
-        }catch (Exception e) {
+        }catch (BeyondLoginTimeException blt) {
+            return ResultSet.error(blt.getResult());
+        }
+        // 这里捕获的是AES加密中的异常，视情况处理即可
+        catch (Exception e) {
             return ResultSet.error("密文加解密错误");
         }
     }
