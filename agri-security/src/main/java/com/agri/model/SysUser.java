@@ -19,7 +19,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SysUser implements Serializable {
+public class SysUser extends User implements Serializable{
 
     private static final long serialVersionUID = 1L;
 

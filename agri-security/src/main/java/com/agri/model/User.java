@@ -38,6 +38,11 @@ public class User {
      */
     private String password;
 
+    /**
+     * 手机号
+     */
+    private String phonenumber;
+
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
