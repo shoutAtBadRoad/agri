@@ -23,6 +23,6 @@ public interface ISysUserService extends IService<SysUser> {
 
     void deleteUserInfoInRedis(List<Long> ids);
 
-    void loadUserInfoById(Long id);
+    LoginUser loadUserInfoById(Long id, String rKey);
 
 }
