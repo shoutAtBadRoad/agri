@@ -7,18 +7,9 @@ import com.agri.service.AuthService;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.cloud.gateway.filter.LoadBalancerClientFilter;
-import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory;
-import org.springframework.cloud.gateway.route.Route;
-import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.ResponseEntity;
@@ -63,33 +54,27 @@ public class AuthenticationFilter implements GlobalFilter{
         String token = exchange.getRequest().getHeaders().getFirst("Authorization");
         if(StringUtils.isEmpty(token)) {
             log.info("无用户凭证");
-            ResultSet<String> error = ResultSet.error("无用户凭证");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("body", error);
-            byte[] bytes = jsonObject.toJSONString().getBytes();
+            ResultSet<String> error = ResultSet.create(ResultStatus.UNAUTHORIZED,"没有携带用户凭证进行访问");
+            byte[] bytes = JSONObject.toJSONBytes(error);
             DataBuffer buffer = response.bufferFactory().wrap(bytes);
             return response.writeWith(Mono.just(buffer));
         }
+        //TODO 根据token和URI做一个缓存，缓存中有相关信息就不去校验权限，分为两种：用户无权限，用户有权限
+        //TODO 如果一个权限发生了改变，还需要被通知将缓存删除
         String authenticated = authService.verifyAuthentication(token, routeUri.getPath());
         //TODO 如果未认证通过
         ResultSet resultSet = JSONObject.parseObject(authenticated, ResultSet.class);
         int code = resultSet.getCode();
-        if(code == ResultStatus.AUTHORITY.getCode()) {
+        if(code == ResultStatus.UNAUTHORIZED.getCode()) {
             log.info("用户无效凭证");
-            ResultSet<String> error = ResultSet.error("无效凭证");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("body", error);
-            byte[] bytes = jsonObject.toJSONString().getBytes();
+            ResultSet<String> error = ResultSet.create(ResultStatus.UNAUTHORIZED,null);
+            byte[] bytes = JSONObject.toJSONBytes(error);
             DataBuffer buffer = response.bufferFactory().wrap(bytes);
             return response.writeWith(Mono.just(buffer));
-        }
-        Boolean b = (Boolean)resultSet.getBody();
-        if(!b) {
+        }else if(code == ResultStatus.FORBIDDEN.getCode()){
             log.info("用户无权限");
-            ResultSet<String> error = ResultSet.error("用户无权限");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("body", error);
-            byte[] bytes = jsonObject.toJSONString().getBytes();
+            ResultSet<String> forbidden = ResultSet.create(ResultStatus.FORBIDDEN, null);
+            byte[] bytes = JSONObject.toJSONBytes(forbidden);
             DataBuffer buffer = response.bufferFactory().wrap(bytes);
             return response.writeWith(Mono.just(buffer));
         }
