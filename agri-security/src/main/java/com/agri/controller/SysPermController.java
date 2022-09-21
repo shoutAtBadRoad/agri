@@ -9,6 +9,9 @@ import com.agri.utils.annotation.SaveAuth;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/sysPerm")
+@Api("权限控制器")
 public class SysPermController {
 
     @Autowired
@@ -39,7 +43,8 @@ public class SysPermController {
 
     @PostMapping("/all")
     @SaveAuth(roles = {"admin"})
-    public ResultSet getAllPerms(@RequestParam("size") Long cSize, @RequestParam("page") Long cPage) {
+    @ApiOperation(value = "权限信息查询接口", response = List.class)
+    public ResultSet getAllPerms(@ApiParam("分页大小") @RequestParam("size") Long cSize, @ApiParam("页号") @RequestParam("page") Long cPage) {
         IPage<SysPerm> page = new Page<>();
         // 设置分页相关的信息
         // 设置页大小
@@ -52,7 +57,8 @@ public class SysPermController {
 
     @PostMapping("/revise")
     @SaveAuth(roles = {"admin"})
-    public ResultSet revisePerms(@RequestBody(required = true) List<SysPerm> permList) {
+    @ApiOperation(value = "权限信息修改接口", response = String.class)
+    public ResultSet revisePerms(@ApiParam("传入的权限列表") @RequestBody(required = true) List<SysPerm> permList) {
         iSysPermService.updateBatchById(permList);
         // 删除缓存
         permsRolesService.deletePermsOfRolesInRedis();
@@ -61,8 +67,9 @@ public class SysPermController {
 
     @PostMapping("/delete")
     @SaveAuth(roles = {"admin"})
+    @ApiOperation(value = "权限删除列表", response = String.class)
     @Transactional
-    public ResultSet deletePerms(@RequestBody List<Long> ids) {
+    public ResultSet deletePerms(@ApiParam("需要删除的权限id列表") @RequestBody List<Long> ids) {
         List<SysRolePerm> rolePerms = iSysRolePermService.list(new QueryWrapper<SysRolePerm>().in("permId", ids));
         // 删除关系表中权限
         iSysRolePermService.removeByIds(rolePerms);
@@ -76,7 +83,8 @@ public class SysPermController {
 
     @PostMapping("/add")
     @SaveAuth(roles = {"admin"})
-    public ResultSet addPerms(@RequestBody List<SysPerm> permList) {
+    @ApiOperation(value = "权限添加接口", response = String.class)
+    public ResultSet addPerms(@ApiParam("权限列表") @RequestBody List<SysPerm> permList) {
         iSysPermService.saveBatch(permList);
         return ResultSet.OK("添加成功");
     }

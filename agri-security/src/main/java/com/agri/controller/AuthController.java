@@ -1,11 +1,15 @@
 package com.agri.controller;
 
+import com.agri.model.RedisConstant;
 import com.agri.model.ResultSet;
 import com.agri.model.ResultStatus;
 import com.agri.security.model.LoginUser;
 import com.agri.service.PermsRolesService;
 import com.agri.utils.RedisUtil;
 import com.agri.utils.annotation.SaveAuth;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +20,13 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
+/**
+ * @author jyp
+ * @since 2022-9-1
+ */
 @RestController
 @RequestMapping(value = "/auth")
+@Api(tags = "权限校验控制器")
 public class AuthController {
 
     @Autowired
@@ -26,17 +35,14 @@ public class AuthController {
     @Autowired
     public PermsRolesService permsRolesService;
 
-    Map<String, LoginUser> map = new HashMap<>(){{
-        put("1", new LoginUser());
-    }};
-
     /**
      * 权限校验接口
      * @return
      */
     @PostMapping("/apiAuth")
+    @ApiOperation(value = "权限校验接口", response = Boolean.class)
     @SaveAuth
-    public ResultSet<Boolean> authenticationApi(HttpServletRequest request, @RequestParam("uri")String uri) {
+    public ResultSet<Boolean> authenticationApi(@ApiParam("进行校验的uri") @RequestParam("uri") String uri) {
         // 拿到用户信息
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         LoginUser user = (LoginUser)authentication.getPrincipal();
@@ -44,9 +50,9 @@ public class AuthController {
         List<String> permissions = user.getPermissions();
         Boolean checked = permsRolesService.checkPerms(uri, permissions);
         if(checked) {
-            return ResultSet.OK(ResultStatus.OK,Boolean.TRUE,null);
+            return ResultSet.OK(true);
         }
-        return ResultSet.OK(ResultStatus.OK, Boolean.FALSE, null);
+        return ResultSet.create(ResultStatus.FORBIDDEN, false);
     }
 
 }
