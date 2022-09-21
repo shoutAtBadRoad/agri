@@ -8,6 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+/**
+ * 进行token续期
+ * @see Order 用来在拦截器链中排序
+ * @author jyp
+ * @since 2022-9-1
+ */
 @Component
 @Order(2)
 @Slf4j

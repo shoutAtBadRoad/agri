@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+/**
+ * 判断token格式是否合法
+ * @author jyp
+ * @since 2020-9-1
+ */
 @Component
 @Order(0)
 @Slf4j

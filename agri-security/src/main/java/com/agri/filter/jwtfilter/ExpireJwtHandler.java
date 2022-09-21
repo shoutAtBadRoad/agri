@@ -10,6 +10,11 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+/**
+ * 判断JWT token是否过期
+ * @author jyp
+ * @since 2020-9-1
+ */
 @Component
 @Order(1)
 @Slf4j

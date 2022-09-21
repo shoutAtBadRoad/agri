@@ -12,6 +12,7 @@
         <module>agri-gateway</module>
         <module>agri-consumer</module>
         <module>agri-security</module>
+        <module>agri-common</module>
     </modules>
 
     <parent>
@@ -20,8 +21,21 @@
         <version>2.3.4.RELEASE</version>
     </parent>
 
+
     <properties>
         <java.version>11</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <junit.version>4.12</junit.version>
+        <log4j.version>1.2.17</log4j.version>
+        <lombok.verson>1.16.10</lombok.verson>
+        <mysql.version>8.0.21</mysql.version>
+        <druid.version>1.1.9</druid.version>
+        <mybatis.spring.boot.version>2.1.4</mybatis.spring.boot.version>
+        <mybatis.plus.boot.version>3.4.1</mybatis.plus.boot.version>
+        <swagger2.version>2.7.0</swagger2.version>
+        <swagger2.ui.version>2.7.0</swagger2.ui.version>
     </properties>
 
     <dependencies>
@@ -33,6 +47,18 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.62</version>
+        </dependency>
+
+        <!--Swagger-UI API文档生产工具-->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${swagger2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${swagger2.ui.version}</version>
         </dependency>
     </dependencies>
 

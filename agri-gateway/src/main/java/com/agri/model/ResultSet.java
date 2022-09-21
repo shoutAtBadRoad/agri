@@ -19,6 +19,9 @@ public class ResultSet<T> implements Serializable {
     @JSONField(name = "msg")
     private String msg;
 
+    public static <T> ResultSet<T> create(ResultStatus status, T body) {
+        return new ResultSet<T>(status.getCode(), body, status.getReasonPhrase());
+    }
 
     public static <T> ResultSet<T> OK(T body) {
         return OK(ResultStatus.OK, body);

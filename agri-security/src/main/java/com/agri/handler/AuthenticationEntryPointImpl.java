@@ -23,7 +23,7 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         // 處理異常
-        ResultSet<Object> resultSet = ResultSet.OK(ResultStatus.AUTHORITY, null, "用户认证失败");
+        ResultSet<Object> resultSet = ResultSet.OK(ResultStatus.UNAUTHORIZED, null, "用户认证失败");
         renderString(response, JSONObject.toJSONString(resultSet));
     }
 

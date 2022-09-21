@@ -1,7 +1,10 @@
 package com.agri.service.impl;
 
+import com.agri.config.SecurityConfig;
+import com.agri.controller.LoginController;
 import com.agri.exception.BeyondLoginTimeException;
 import com.agri.filter.jwtfilter.RenewalJwtHandler;
+import com.agri.model.LoginType;
 import com.agri.model.RedisConstant;
 import com.agri.security.model.LoginUser;
 import com.agri.service.LoginService;
@@ -15,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -31,9 +35,17 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 登陆服务
+ * @author jyp
+ * @since 2022-8-20
+ */
 @Service(value = "loginServiceImpl")
 public class LoginServiceImpl implements LoginService {
 
+    /**
+     * 认证管理器 {@link SecurityConfig#authenticationManagerBean()}
+     */
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -47,7 +59,7 @@ public class LoginServiceImpl implements LoginService {
     HttpServletRequest request;
 
     @Override
-    public String loginReturnToken(String username, String password) throws NoSuchPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+    public String loginReturnToken(String username, String password) throws AuthenticationException, NoSuchPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
         //TODO 等前端的密码使用AES加密后，这里的密码就需要解一下密
 //        password = AESUtil.decryptAES(password.getBytes());
         String ipAddress = UriUtil.getIpAddress(request);
@@ -59,6 +71,8 @@ public class LoginServiceImpl implements LoginService {
         try {
             authenticate = authenticationManager.authenticate(token);
         }catch (BadCredentialsException e) {
+            if(LoginController.loginMethod.get() == LoginType.CODE_PHONE.getType())
+                throw e;
             // 抛出用户名密码不正确的异常，告诉前端还有几次重试机会或者账户已经被锁定，几分钟后解锁
             int leaves = 0;
             if ((leaves = loginTimesCount(username, ipAddress, false)) > 0) {

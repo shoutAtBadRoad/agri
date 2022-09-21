@@ -3,9 +3,12 @@ package com.agri.utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +29,11 @@ public class RedisUtil<T> {
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
 
+    public boolean kkk(String id, String s) {
+        System.out.println(s);
+        return true;
+    }
+
     //=============================common============================
     /**
      * 指定缓存失效时间
@@ -36,7 +44,7 @@ public class RedisUtil<T> {
     public boolean expire(String key, long time){
         try {
             if(time>0){
-                redisTemplate.expire(key, time, TimeUnit.SECONDS);
+                redisTemplate.expire(key, time, TimeUnit.MILLISECONDS);
             }
             return true;
         } catch (Exception e) {
@@ -51,7 +59,7 @@ public class RedisUtil<T> {
      * @return 时间(秒) 返回0代表为永久有效
      */
     public long getExpire(String key){
-        return redisTemplate.getExpire(key, TimeUnit.SECONDS);
+        return redisTemplate.getExpire(key, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -89,10 +97,10 @@ public class RedisUtil<T> {
      * @param key 键
      * @return 值
      */
-    public T get(String key){
+    public Object get(String key){
         ValueOperations<Object, Object> ops = redisTemplate.opsForValue();
         Object o = ops.get(key);
-        return (T) o;
+        return o;
     }
 
     /**
@@ -122,7 +130,7 @@ public class RedisUtil<T> {
     public boolean set(String key, Object value, long time){
         try {
             if(time>0){
-                redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
+                redisTemplate.opsForValue().set(key, value, time, TimeUnit.MILLISECONDS);
             }else{
                 set(key, value);
             }
@@ -159,6 +167,10 @@ public class RedisUtil<T> {
         return redisTemplate.opsForValue().increment(key, -delta);
     }
 
+    public boolean setIfAbsent(String key, String val, long time) {
+        return redisTemplate.opsForValue().setIfAbsent(key, val, time, TimeUnit.MILLISECONDS);
+    }
+
     //================================Map=================================
     /**
      * HashGet
@@ -185,7 +197,7 @@ public class RedisUtil<T> {
      * @param map 对应多个键值
      * @return true 成功 false 失败
      */
-    public boolean hmset(String key, Map<String, Object> map){
+    public boolean hmset(String key, Map map){
         try {
             redisTemplate.opsForHash().putAll(key, map);
             return true;
@@ -194,6 +206,8 @@ public class RedisUtil<T> {
             return false;
         }
     }
+
+
 
     /**
      * HashSet 并设置时间
@@ -535,6 +549,11 @@ public class RedisUtil<T> {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    public Object execute(RedisScript<?> script, List<Object> keys, Object... args ) {
+        Object o = redisTemplate.execute(script, keys, args);
+        return o;
     }
 
 }

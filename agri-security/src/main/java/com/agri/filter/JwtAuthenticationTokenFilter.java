@@ -18,23 +18,30 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * JWT token验证类
+ * @see #doFilterInternal(HttpServletRequest, HttpServletResponse, FilterChain)
+ * {@link JwtFilterChain}
+ * @author jyp
+ * @since 2022-9-1
+ */
 @Component
 @Slf4j
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
-    @Autowired
+    @Resource
     private RedisUtil redisUtil;
-    @Autowired
+    @Resource
     JwtFilterChain chain;
-    @Autowired
+    @Resource
     private ISysUserService userService;
 
     @Override
@@ -46,30 +53,28 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(httpServletRequest,httpServletResponse);
             return;
         }
+
         // 解析token
         String userid = null;
         Claims claims = chain.doCheck(token, null, UUID.randomUUID().toString());
         if(claims == null) {
             // 處理異常
-            ResultSet<Object> resultSet = ResultSet.OK(ResultStatus.AUTHORITY, null, "用户认证失败");
+            ResultSet<Object> resultSet = ResultSet.create(ResultStatus.UNAUTHORIZED,null);
             renderString(httpServletResponse, JSONObject.toJSONString(resultSet));
-            log.info("用戶未登錄");
+            log.info("非法认证-token:" + token);
             return;
         }
+
         userid = claims.getSubject();
         // 如果用户的角色修改了，redis中缓存的信息会被清楚，所以需要判断redis中是否有用户信息，如果没有需要从库中重新读取并放入缓存中
         boolean b = redisUtil.hasKey(userid);
-        if(!b) {
-            synchronized (JwtAuthenticationTokenFilter.class) {
-                boolean b1 = redisUtil.hasKey(userid);
-                if(!b1) {
-                    // TODO 需要考虑加载失败的情况
-                    userService.loadUserInfoById(Long.valueOf(userid));
-                }
-            }
+        LoginUser loginUser;
+        if(!b)
+            loginUser = userService.loadUserInfoById(Long.valueOf(userid), userid);
+        else {
+            loginUser = (LoginUser) redisUtil.get(userid);
+//            loginUser = JSONObject.parseObject(o.toString(), LoginUser.class);
         }
-        Object o = redisUtil.get(userid);
-        LoginUser loginUser = JSON.parseObject(o.toString(), LoginUser.class);
         // 存入SecurityContextHolder
         // 獲取權限信息封裝到Authentication
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken

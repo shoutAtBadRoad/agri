@@ -9,15 +9,19 @@ import com.agri.model.User;
 import com.agri.security.model.LoginUser;
 import com.agri.service.ISysUserService;
 import com.agri.utils.RedisUtil;
-import com.alibaba.nacos.shaded.org.checkerframework.checker.units.qual.A;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.agri.utils.annotation.lock.Locked;
+import com.agri.utils.annotation.lock.Param;
+import com.agri.utils.annotation.lock.RKey;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,21 +34,22 @@ import java.util.Objects;
  * @since 2022-08-29
  */
 @Service
+@Log4j
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements ISysUserService {
 
-    @Autowired
+    @Resource
     private SysUserMapper sysUserMapper;
 
-    @Autowired
+    @Resource
     private UserMapper userMapper;
 
-    @Autowired
+    @Resource
     private SysUserRoleMapper sysUserRoleMapper;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @Resource
+    private BCryptPasswordEncoder passwordEncoder;
 
-    @Autowired
+    @Resource
     private RedisUtil redisUtil;
 
     @Override
@@ -79,7 +84,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public void loadUserInfoById(Long id) {
+    @Locked
+    public LoginUser loadUserInfoById(@Param Long id, @RKey String rKey) {
+        log.info("redisKey:" + rKey + "---开始加载数据");
         User user = userMapper.selectById(id);
         if(Objects.isNull(user)) {
             throw new RuntimeException("用戶名或密碼錯誤");
@@ -88,5 +95,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         List<String> list = sysUserRoleMapper.getRolesOfUser(user.getUserid());
         LoginUser loginUser = new LoginUser(user, list);
         redisUtil.set(String.valueOf(id), loginUser);
+        return loginUser;
     }
 }

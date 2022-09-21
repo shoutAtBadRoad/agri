@@ -17,6 +17,12 @@ spring:
             - Path=/security/**
           filters:
             - StripPrefix=1 # 断言前缀取消的层数
+        - id: admin
+          uri: lb://postAdmin
+          predicates:
+            - Path=/postAdmin/**
+          filters:
+            - StripPrefix=1
       discovery:
         locator:
           enabled: false

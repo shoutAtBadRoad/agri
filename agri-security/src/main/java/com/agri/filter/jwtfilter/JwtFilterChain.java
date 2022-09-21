@@ -9,6 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * {@link JwtFilterChain#handlers} 注入拦截器链
+ * {@link JwtFilterChain#index} ThreadLocal当前线程的拦截器执行定位
+ * {@link JwtFilterChain#doCheck(String, Claims, String)} 传入token、用户主体属性、id可以不要
+ * @author jyp
+ * @since 2022-9-1
+ */
 @Component
 public class JwtFilterChain {
 
