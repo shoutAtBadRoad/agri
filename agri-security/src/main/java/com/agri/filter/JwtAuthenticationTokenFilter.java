@@ -1,7 +1,7 @@
 package com.agri.filter;
 
 import com.agri.filter.jwtfilter.JwtFilterChain;
-import com.agri.model.ResultSet;
+import com.agri.model.CommonResult;
 import com.agri.model.ResultStatus;
 import com.agri.security.model.LoginUser;
 import com.agri.service.ISysUserService;
@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -44,11 +45,11 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Resource
     private ISysUserService userService;
 
-    @Override
+    @Override                                                                                                                                                       
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         // 獲取token
         String token = httpServletRequest.getHeader("Authorization");
-        if(!StringUtils.hasText(token)) {
+        if(Objects.isNull(token) || !StringUtils.hasText(token)) {
             // 放行
             filterChain.doFilter(httpServletRequest,httpServletResponse);
             return;
@@ -59,8 +60,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         Claims claims = chain.doCheck(token, null, UUID.randomUUID().toString());
         if(claims == null) {
             // 處理異常
-            ResultSet<Object> resultSet = ResultSet.create(ResultStatus.UNAUTHORIZED,null);
-            renderString(httpServletResponse, JSONObject.toJSONString(resultSet));
+            CommonResult<Object> result = CommonResult.create(ResultStatus.UNAUTHORIZED,null);
+            renderString(httpServletResponse, JSONObject.toJSONString(result));
             log.info("非法认证-token:" + token);
             return;
         }
@@ -74,6 +75,13 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         else {
             loginUser = (LoginUser) redisUtil.get(userid);
 //            loginUser = JSONObject.parseObject(o.toString(), LoginUser.class);
+        }
+        // 检查用户是否禁用
+        if(loginUser.getUser().getStatus() == 1) {
+            redisUtil.del(loginUser.getUser().getUserid().toString());
+            CommonResult<String> commonResult = CommonResult.create(ResultStatus.ACCOUNT_LOCKED, "账户已被禁用，请联系管理员");
+            renderString(httpServletResponse, JSONObject.toJSONString(commonResult));
+            return;
         }
         // 存入SecurityContextHolder
         // 獲取權限信息封裝到Authentication

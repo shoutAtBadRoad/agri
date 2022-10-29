@@ -1,6 +1,6 @@
 package com.agri.controller;
 
-import com.agri.model.ResultSet;
+import com.agri.model.CommonResult;
 import com.agri.model.ResultStatus;
 import com.agri.model.SysUser;
 import com.agri.security.sms.SmsSendService;
@@ -30,15 +30,15 @@ public class SmsController {
     @GetMapping("/send/code")
     @ApiOperation(value = "短信验证码发送接口", response = String.class)
     @SaveAuth
-    public ResultSet<String> getSmsCode(@ApiParam("手机号") @RequestParam String phoneNumber) {
+    public CommonResult<String> getSmsCode(@ApiParam("手机号") @RequestParam String phoneNumber) {
         // 检查手机号
         if(StringUtils.isEmpty(phoneNumber))
-            return ResultSet.create(ResultStatus.OK, "手机号为空");
+            return CommonResult.create(ResultStatus.OK, "手机号为空");
         SysUser user = userService.getOne(new QueryWrapper<SysUser>().eq("phonenumber", phoneNumber));
         if(Objects.isNull(user))
-            return ResultSet.create(ResultStatus.PHONE_FREE, "手机号尚未注册");
+            return CommonResult.create(ResultStatus.PHONE_FREE, "手机号尚未注册");
         // 通知监听器发送短信
         smsSendService.sendSms(phoneNumber);
-        return ResultSet.create(ResultStatus.OK, "短信发送成功，十分钟有效");
+        return CommonResult.create(ResultStatus.OK, "短信发送成功，十分钟有效");
     }
 }

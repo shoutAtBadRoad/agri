@@ -2,6 +2,7 @@ package com.agri.service.impl;
 
 import com.agri.config.SecurityConfig;
 import com.agri.controller.LoginController;
+import com.agri.exception.AccountException;
 import com.agri.exception.BeyondLoginTimeException;
 import com.agri.filter.jwtfilter.RenewalJwtHandler;
 import com.agri.model.LoginType;
@@ -84,9 +85,12 @@ public class LoginServiceImpl implements LoginService {
         // 如果登陆成功，把登陆次数锁定删除
         releaseLock(username, ipAddress);
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
+        if(loginUser.getUser().getStatus() == AccountException.FORBIDDEN_FLAG) {
+            throw new AccountException(AccountException.ACCOUNT_FORBIDDEN);
+        }
+
         String id = String.valueOf(loginUser.getUser().getUserid());
         String jwt = JwtUtil.createJWT(id);
-
         // 存儲redis
         redisUtil.set(id, loginUser);
         redisUtil.set(jwt, jwt, RenewalJwtHandler.DEFAULT_EXPIRE_TIME);

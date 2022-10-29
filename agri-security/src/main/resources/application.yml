@@ -1,5 +1,7 @@
 
 spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
   application:
     name: security
   cloud:
@@ -11,14 +13,14 @@ spring:
     port: 6379
     timeout: 100000
     password: jyjyp123
-  #    password: 123456
+#    password: 123456
 #    host: 192.168.122.3
 #    sentinel:
 #      nodes:
 #        - 192.168.122.4:26379
 #        - 192.168.122.5:26379
 #        - 192.168.122.3:26379
-##      password: 123456
+#      password: 123456
 #      master: mymaster
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

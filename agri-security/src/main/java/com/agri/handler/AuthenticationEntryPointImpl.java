@@ -1,6 +1,6 @@
 package com.agri.handler;
 
-import com.agri.model.ResultSet;
+import com.agri.model.CommonResult;
 import com.agri.model.ResultStatus;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -23,8 +23,8 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         // 處理異常
-        ResultSet<Object> resultSet = ResultSet.OK(ResultStatus.UNAUTHORIZED, null, "用户认证失败");
-        renderString(response, JSONObject.toJSONString(resultSet));
+        CommonResult<Object> result = CommonResult.OK(ResultStatus.UNAUTHORIZED, null, "用户认证失败");
+        renderString(response, JSONObject.toJSONString(result));
     }
 
     private void renderString(HttpServletResponse response, String msg) throws IOException {

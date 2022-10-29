@@ -3,16 +3,16 @@
 <mapper namespace="com.agri.mapper.SysUserRoleMapper">
 
     <select id="getRolesOfUsers" resultType="java.util.Map">
-        select * from
+        select c.userid user_id, c.user_name user_name, b.* from
         sys_user_role a left join sys_role b on a.role_id = b.id
         left join sys_user c on a.user_id = c.userid
         where a.user_id in
-        <foreach collection="ids" item="ids" open="(" close=")">
+        <foreach collection="ids" item="ids" open="(" close=")" separator=",">
             #{ids}
         </foreach>
     </select>
     <select id="getRolesOfUser" resultType="java.lang.String">
-        SELECT distinct a.name from
+        SELECT distinct a.role_key from
         sys_role a left join sys_user_role b on a.id = b.role_id
         where b.user_id= #{userid} and a.`status`='0'
     </select>

@@ -52,4 +52,6 @@ public class User {
     @TableField("del_flag")
     private Integer delFlag;
 
+    private Integer status;
+
 }

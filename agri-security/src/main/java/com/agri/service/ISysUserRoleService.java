@@ -17,6 +17,6 @@ import java.util.Map;
  */
 public interface ISysUserRoleService extends IService<SysUserRole> {
 
-    List<Map<String, String>> getRolesOfUsers(List<Long> ids, Long cSize, Long cPage);
+    List<Map<String, String>> getRolesOfUsers(List<Long> ids);
 
 }

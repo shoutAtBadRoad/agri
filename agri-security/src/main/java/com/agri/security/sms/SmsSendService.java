@@ -1,6 +1,5 @@
 package com.agri.security.sms;
 
-import com.agri.security.sms.SmsSendEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;

@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
 
-    Page<Map<String, String>> getRolesOfUsers(List<Long> ids, IPage<SysUserRole> page);
+    Page<Map<String, String>> getRolesOfUsers(List<Long> ids);
 
     List<String> getRolesOfUser(Long userid);
 

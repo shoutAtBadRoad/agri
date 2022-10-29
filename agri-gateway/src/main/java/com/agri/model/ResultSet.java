@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResultSet<T> implements Serializable {
+public class CommonResult<T> implements Serializable {
 
     @JSONField(name = "code")
     private Integer code;
@@ -19,34 +19,34 @@ public class ResultSet<T> implements Serializable {
     @JSONField(name = "msg")
     private String msg;
 
-    public static <T> ResultSet<T> create(ResultStatus status, T body) {
-        return new ResultSet<T>(status.getCode(), body, status.getReasonPhrase());
+    public static <T> CommonResult<T> create(ResultStatus status, T body) {
+        return new CommonResult<T>(status.getCode(), body, status.getReasonPhrase());
     }
 
-    public static <T> ResultSet<T> OK(T body) {
+    public static <T> CommonResult<T> OK(T body) {
         return OK(ResultStatus.OK, body);
     }
 
-    public static <T>  ResultSet<T> OK(ResultStatus status, T body, String message) {
-        ResultSet<T> resultSet = new ResultSet<>(status.getCode(), body, message);
-        return resultSet;
+    public static <T>  CommonResult<T> OK(ResultStatus status, T body, String message) {
+        CommonResult<T> CommonResult = new CommonResult<>(status.getCode(), body, message);
+        return CommonResult;
     }
 
-    public static <T> ResultSet<T> OK(ResultStatus status, T body) {
+    public static <T> CommonResult<T> OK(ResultStatus status, T body) {
         return  OK(status, body, null);
     }
 
-    public static <T>  ResultSet<T> error(T body) {
-        ResultSet<T> resultSet = new ResultSet<>(ResultStatus.ERROR.getCode(), body, null);
-        return resultSet;
+    public static <T>  CommonResult<T> error(T body) {
+        CommonResult<T> CommonResult = new CommonResult<>(ResultStatus.ERROR.getCode(), body, null);
+        return CommonResult;
     }
 
-    public static <T>  ResultSet<T> error(ResultStatus status, T body, String message) {
-        ResultSet<T> resultSet = new ResultSet<>(status.getCode(), body, message);
-        return resultSet;
+    public static <T>  CommonResult<T> error(ResultStatus status, T body, String message) {
+        CommonResult<T> CommonResult = new CommonResult<>(status.getCode(), body, message);
+        return CommonResult;
     }
 
-    public static <T> ResultSet<T> error(ResultStatus status, T body) {
+    public static <T> CommonResult<T> error(ResultStatus status, T body) {
         return  OK(status, body, null);
     }
 

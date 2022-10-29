@@ -81,6 +81,16 @@ public class RedisUtil<T> {
      * @param key 可以传一个值 或多个
      */
     @SuppressWarnings("unchecked")
+    public void del(List<String> key){
+        if(key!=null&&key.size()>0){
+            if(key.size()==1){
+                redisTemplate.delete(key.get(0));
+            }else{
+                redisTemplate.delete(key);
+            }
+        }
+    }
+
     public void del(String... key){
         if(key!=null&&key.length>0){
             if(key.length==1){

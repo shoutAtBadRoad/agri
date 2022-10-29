@@ -20,7 +20,11 @@ import java.util.*;
 /**
  * @author jyp
  * @since 2022-9-10
- * {@link Locked}对Locked注解下的方法的执行，加上分布式锁
+ *
+ * <p>
+ *     {@link Locked}对Locked注解下的方法的执行，加上分布式锁
+ *     如果是当前对象调用自己的方法，加这个注解也没用的，因为它调用的不是代理对象
+ * </p>
  * {@link RKey} 资源的key
  * {@link com.agri.utils.annotation.lock.Param} 获取资源所需参数
  * Locked注解下的方法，需要有一个名为rKey，类型为String的参数，需要业务中传入，作为资源在redis中的key
@@ -30,7 +34,7 @@ import java.util.*;
 @Slf4j
 public class LoadFromRedisWithLock {
 
-    private static Set<Class<?>> returnTypes = new HashSet(){{
+    private static final Set<Class<?>> returnTypes = new HashSet(){{
         add(Map.class);
         add(List.class);
         add(Set.class);
@@ -92,6 +96,7 @@ public class LoadFromRedisWithLock {
         }
         Object o;
         Class<?> type = method.getReturnType();
+        // TODO
         type = returnTypes.contains(type) ? type : type;
         o = redisLoader.loadWithLock(service, lockKey, rKey, type, joinPoint);
         if(o.getClass() == type) {

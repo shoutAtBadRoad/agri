@@ -9,4 +9,38 @@
             #{ids}
         </foreach>
     </select>
+    <select id="getUsersWithType" resultType="java.util.Map">
+        select a.userid, a.user_name userName, a.nick_name nickName, a.password, a.user_type userType,
+          a.create_by createBy, a.create_time createTime, a.update_time updateTime, a.del_flag delFlag, a.status, a.phonenumber, a.email,
+           b.name userTypeName from
+        sys_user a left join sys_role b on a.user_type = b.id
+        where true and a.del_flag = 0
+        <if test="params.phonenumber != null">
+            and a.phonenumber = #{params.phonenumber}
+        </if>
+        <if test="params.userName != null">
+            and a.user_name = #{params.userName}
+        </if>
+        <if test="params.nickName != null">
+            and a.nick_name = #{params.nickName}
+        </if>
+        <if test="params.status != null">
+            and a.status = #{params.status}
+        </if>
+        <if test="params.email != null">
+            and a.email = #{params.email}
+        </if>
+        <if test="params.sex != null">
+            and a.sex = #{params.sex}
+        </if>
+        <if test="params.userType != null">
+            and a.user_type = #{params.userType}
+        </if>
+        <if test="ids != null">
+            and a.id in
+            <foreach collection="ids" item="ids" open="(" close=")" separator=",">
+                #{ids}
+            </foreach>
+        </if>
+    </select>
 </mapper>

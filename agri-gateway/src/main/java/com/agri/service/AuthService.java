@@ -1,6 +1,6 @@
 package com.agri.service;
 
-import com.agri.model.ResultSet;
+import com.agri.model.CommonResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,7 +1,7 @@
 package com.agri.controller;
 
 import com.agri.model.RedisConstant;
-import com.agri.model.ResultSet;
+import com.agri.model.CommonResult;
 import com.agri.model.ResultStatus;
 import com.agri.security.model.LoginUser;
 import com.agri.service.PermsRolesService;
@@ -42,7 +42,7 @@ public class AuthController {
     @PostMapping("/apiAuth")
     @ApiOperation(value = "权限校验接口", response = Boolean.class)
     @SaveAuth
-    public ResultSet<Boolean> authenticationApi(@ApiParam("进行校验的uri") @RequestParam("uri") String uri) {
+    public CommonResult<Boolean> authenticationApi(@ApiParam("进行校验的uri") @RequestParam("uri") String uri) {
         // 拿到用户信息
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         LoginUser user = (LoginUser)authentication.getPrincipal();
@@ -50,9 +50,9 @@ public class AuthController {
         List<String> permissions = user.getPermissions();
         Boolean checked = permsRolesService.checkPerms(uri, permissions);
         if(checked) {
-            return ResultSet.OK(true);
+            return CommonResult.OK(true);
         }
-        return ResultSet.create(ResultStatus.FORBIDDEN, false);
+        return CommonResult.create(ResultStatus.FORBIDDEN, false);
     }
 
 }

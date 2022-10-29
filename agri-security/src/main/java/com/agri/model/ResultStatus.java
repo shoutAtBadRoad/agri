@@ -45,7 +45,16 @@ public enum ResultStatus {
     /**
      * 手机号已经注册
      */
-    PHONE_CLAIMED(604, "Phone Claimed")
+    PHONE_CLAIMED(604, "Phone Claimed"),
+    /**
+     * 手机号或邮箱重复
+     */
+    PHONE_MAIL_CLAIMED(605, "Phone or Email Claimed"),
+
+    /**
+     * 请求参数错误
+     */
+    ARGUMENTS_WRONG(701, "Wrong Request Arguments")
     ;
 
 

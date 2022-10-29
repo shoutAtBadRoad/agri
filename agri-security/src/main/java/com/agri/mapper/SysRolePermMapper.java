@@ -23,4 +23,6 @@ import java.util.Map;
 public interface SysRolePermMapper extends MppBaseMapper<SysRolePerm> {
 
     IPage<Map<String, String >> getPermsOfRoles(@Param("ids") List<Long> ids, IPage<?> page);
+
+
 }

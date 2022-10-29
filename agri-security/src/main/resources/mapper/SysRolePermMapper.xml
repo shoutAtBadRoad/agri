@@ -3,11 +3,11 @@
 <mapper namespace="com.agri.mapper.SysRolePermMapper">
 
     <select id="getPermsOfRoles" resultType="java.util.Map">
-        select * from
-        sys_role_perm a LEFT JOIN sys_role b on a.role_id = b.id
-        LEFT JOIN sys_perm c on a.perm_id = c.id
-        where b.id =
-        <foreach collection="ids" item="val" open="(" close=")">
+        select c.* from
+        sys_role_perm a
+        RIGHT JOIN sys_perm c on a.perm_id = c.id
+        where a.role_id in
+        <foreach collection="ids" item="val" open="(" close=")" separator=",">
             #{val}
         </foreach>
     </select>

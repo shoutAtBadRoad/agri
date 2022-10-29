@@ -1,16 +1,26 @@
 package com.agri.controller;
 
 
-import com.agri.model.ResultSet;
+import com.agri.exception.DuplicateUserException;
+import com.agri.model.CommonResult;
+import com.agri.model.ResultStatus;
 import com.agri.model.SysUser;
+import com.agri.security.model.LoginUser;
 import com.agri.service.ISysUserService;
 import com.agri.utils.annotation.AESUtil;
 import com.agri.utils.annotation.SaveAuth;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.crypto.Cipher;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.Result;
@@ -31,20 +41,36 @@ public class SysUserController {
     @Autowired
     private ISysUserService iSysUserService;
 
+    @Resource
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @PostMapping("/all")
     @SaveAuth(roles = {"admin"})
-    public ResultSet getAllUser(@RequestBody List<Long> ids, @RequestParam("size") Long cSize, @RequestParam("cPage") Long page) {
+    public CommonResult getAllUser(@RequestBody Map<String, Object> infos){
+                                //@RequestBody List<Long> ids, @RequestParam("size") Long cSize, @RequestParam("cPage") Long page) {
+        //TODO 修改为实体类接收
+//        infos = (Map<String, Object>) infos.get("params");
+        List<Long> ids = (List<Long>) infos.get("ids");
+        if(ids == null) {
+            return CommonResult.create(ResultStatus.ARGUMENTS_WRONG, "参数错误");
+        }
+        // 添加查询条件
+        String mobile = (String) infos.get("phonenumber");
+        if(StringUtils.isEmpty(mobile)) {
+            infos.put("phonenumber", null);
+        }
+        long size = ((Integer)infos.get("pagesize")).longValue();
+        long page = ((Integer) infos.get("pagenum")).longValue();
         IPage<SysUser> userIPage = new Page<>();
-        userIPage.setSize(cSize);
-        userIPage.setPages(page);
-        if(ids == null || ids.size() == 0) {
-            IPage<SysUser> sysUserIPage = iSysUserService.page(userIPage);
-            List<SysUser> records = sysUserIPage.getRecords();
-            return ResultSet.OK(records);
+        userIPage.setSize(size);
+        userIPage.setCurrent(page);
+        if(ids.size() == 0) {
+            IPage<Map<String, String >> sysUserIPage = iSysUserService.getUsersWithType(null, userIPage, infos);
+//            List<SysUser> records = sysUserIPage.getRecords();
+            return CommonResult.OK(sysUserIPage);
         }else {
-            List<SysUser> users = iSysUserService.getUsers(ids, cSize, page);
-            return ResultSet.OK(users);
+            IPage<Map<String, String>> users = iSysUserService.getUsersWithType(ids, userIPage, infos);
+            return CommonResult.OK(users);
         }
     }
 
@@ -55,18 +81,23 @@ public class SysUserController {
      */
     @PostMapping("/revise")
     @SaveAuth
-    public ResultSet reviseUsers(@RequestBody List<SysUser> userList) {
+    public CommonResult reviseUsers(@RequestBody List<SysUser> userList) {
         if(Objects.isNull(userList) || userList.size() == 0) {
-            return ResultSet.OK("没有要修改的对象");
+            return CommonResult.OK("没有要修改的对象");
         }
-        boolean b = iSysUserService.updateBatchById(userList);
+//        boolean b = iSysUserService.updateBatchById(userList);
+        try {
+            userList = iSysUserService.reviseUsers(userList);
+        }catch (DuplicateUserException e) {
+            return CommonResult.create(ResultStatus.PHONE_MAIL_CLAIMED, e.getUserList());
+        }
         //TODO 如果修改失败，可以写重试机制进行重试
         List<Long> ids = new ArrayList<>();
         userList.forEach(e -> {
             ids.add(e.getUserid());
         });
         iSysUserService.deleteUserInfoInRedis(ids);
-        return ResultSet.OK("修改成功");
+        return CommonResult.OK("修改成功");
     }
 
     /**
@@ -76,8 +107,9 @@ public class SysUserController {
      */
     @PostMapping("/delete")
     @SaveAuth(roles = {"admin"})
-    public ResultSet deleteUsers(@RequestBody List<Long> ids) {
-        return ResultSet.OK("删除成功");
+    public CommonResult deleteUsers(@RequestBody List<Long> ids) {
+        iSysUserService.removeByIds(ids);
+        return CommonResult.OK("删除成功");
     }
 
     /**
@@ -86,9 +118,11 @@ public class SysUserController {
      */
     @PostMapping("/add")
     @SaveAuth(roles = {"admin"})
-    public ResultSet addUsers(@RequestBody List<SysUser> userList) {
-        boolean b = iSysUserService.saveBatch(userList);
-        return ResultSet.OK("创建成功");
+    public CommonResult addUsers(@RequestBody List<SysUser> userList) {
+        if(iSysUserService.addUsers(userList))
+            return CommonResult.OK("创建成功");
+        else
+            return CommonResult.error("添加失败");
     }
 
     /**
@@ -98,7 +132,7 @@ public class SysUserController {
      */
     @PostMapping("/revisePass")
     @SaveAuth
-    public ResultSet revisePass(@RequestBody SysUser user, HttpServletRequest request) {
+    public CommonResult revisePass(@RequestBody SysUser user, HttpServletRequest request) {
         //TODO 先AES解密
 //        byte[] bytes = user.getPassword().getBytes();
 //        String s;
@@ -106,11 +140,11 @@ public class SysUserController {
 //            s = AESUtil.decryptAES(bytes);
 //        }catch (Exception e) {
 //            e.printStackTrace();
-//            return ResultSet.error("内部出错，修改失败");
+//            return CommonResult.error("内部出错，修改失败");
 //        }
 //        user.setPassword(s);
         boolean b = iSysUserService.revisePass(user, request.getHeader("Authorization"));
-        return ResultSet.OK("修改成功");
+        return CommonResult.OK("修改成功");
     }
 
     /**
@@ -118,11 +152,11 @@ public class SysUserController {
      * @return
      */
     @PostMapping("/aes")
-    public ResultSet getAESKeyAndIV() {
+    public CommonResult getAESKeyAndIV() {
         Map<String, String> map = new HashMap<>();
         map.put("key", AESUtil.KEY);
         map.put("iv", AESUtil.IV);
-        return ResultSet.OK(map);
+        return CommonResult.OK(map);
     }
 
 }

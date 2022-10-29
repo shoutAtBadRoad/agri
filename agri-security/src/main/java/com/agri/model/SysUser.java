@@ -6,6 +6,7 @@ import java.io.Serializable;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -47,7 +48,7 @@ public class SysUser extends User implements Serializable{
     /**
      * 賬號狀態（0正常 1停用）
      */
-    private String status;
+    private Integer status;
 
     /**
      * 郵箱
@@ -77,11 +78,13 @@ public class SysUser extends User implements Serializable{
     private Long createBy;
 
     @TableField(value = "create_time", fill = FieldFill.INSERT)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     private Long updateBy;
 
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
     /**

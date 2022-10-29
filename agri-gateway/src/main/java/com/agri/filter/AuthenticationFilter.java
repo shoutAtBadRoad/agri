@@ -1,7 +1,7 @@
 package com.agri.filter;
 
 import com.agri.filter.unfilter.WhiteList;
-import com.agri.model.ResultSet;
+import com.agri.model.CommonResult;
 import com.agri.model.ResultStatus;
 import com.agri.service.AuthService;
 import com.alibaba.fastjson.JSONObject;
@@ -54,7 +54,7 @@ public class AuthenticationFilter implements GlobalFilter{
         String token = exchange.getRequest().getHeaders().getFirst("Authorization");
         if(StringUtils.isEmpty(token)) {
             log.info("无用户凭证");
-            ResultSet<String> error = ResultSet.create(ResultStatus.UNAUTHORIZED,"没有携带用户凭证进行访问");
+            CommonResult<String> error = CommonResult.create(ResultStatus.UNAUTHORIZED,"没有携带用户凭证进行访问");
             byte[] bytes = JSONObject.toJSONBytes(error);
             DataBuffer buffer = response.bufferFactory().wrap(bytes);
             return response.writeWith(Mono.just(buffer));
@@ -63,17 +63,17 @@ public class AuthenticationFilter implements GlobalFilter{
         //TODO 如果一个权限发生了改变，还需要被通知将缓存删除
         String authenticated = authService.verifyAuthentication(token, routeUri.getPath());
         //TODO 如果未认证通过
-        ResultSet resultSet = JSONObject.parseObject(authenticated, ResultSet.class);
-        int code = resultSet.getCode();
+        CommonResult CommonResult = JSONObject.parseObject(authenticated, CommonResult.class);
+        int code = CommonResult.getCode();
         if(code == ResultStatus.UNAUTHORIZED.getCode()) {
             log.info("用户无效凭证");
-            ResultSet<String> error = ResultSet.create(ResultStatus.UNAUTHORIZED,null);
+            CommonResult<String> error = CommonResult.create(ResultStatus.UNAUTHORIZED,null);
             byte[] bytes = JSONObject.toJSONBytes(error);
             DataBuffer buffer = response.bufferFactory().wrap(bytes);
             return response.writeWith(Mono.just(buffer));
         }else if(code == ResultStatus.FORBIDDEN.getCode()){
             log.info("用户无权限");
-            ResultSet<String> forbidden = ResultSet.create(ResultStatus.FORBIDDEN, null);
+            CommonResult<String> forbidden = CommonResult.create(ResultStatus.FORBIDDEN, null);
             byte[] bytes = JSONObject.toJSONBytes(forbidden);
             DataBuffer buffer = response.bufferFactory().wrap(bytes);
             return response.writeWith(Mono.just(buffer));

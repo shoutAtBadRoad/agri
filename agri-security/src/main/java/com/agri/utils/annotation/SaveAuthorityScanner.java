@@ -5,11 +5,8 @@ import com.agri.mapper.SysRoleMapper;
 import com.agri.model.SysPerm;
 import com.agri.model.SysRole;
 import com.agri.model.SysRolePerm;
-import com.agri.service.ISysPermService;
 import com.agri.service.ISysRolePermService;
-import com.agri.service.ISysRoleService;
 import com.agri.utils.RedisUtil;
-import com.alibaba.nacos.shaded.org.checkerframework.checker.units.qual.A;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.log4j.Log4j;
 import org.springframework.aop.support.AopUtils;
@@ -17,8 +14,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -35,7 +30,7 @@ public class SaveAuthorityScanner  implements BeanPostProcessor {
     private RedisUtil redisUtil;
 
     @Autowired
-    private ISysRolePermService rolePermService;
+    private ISysRolePermService RolePermService;
 
     @Autowired
     private SysRoleMapper roleMapper;
@@ -87,7 +82,7 @@ public class SaveAuthorityScanner  implements BeanPostProcessor {
                 sysRolePerm.setPermId(permId);
                 for (Long roleId : roleIds) {
                     sysRolePerm.setRoleId(roleId);
-                    rolePermService.save(sysRolePerm);
+                    RolePermService.save(sysRolePerm);
                 }
             }
 //        }

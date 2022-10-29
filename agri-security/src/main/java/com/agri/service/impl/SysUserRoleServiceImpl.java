@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -23,13 +24,13 @@ import java.util.Map;
 @Service
 public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUserRole> implements ISysUserRoleService {
 
-    @Autowired
+    @Resource
     private SysUserRoleMapper userRoleMapper;
 
     @Override
-    public List<Map<String, String>> getRolesOfUsers(List<Long> ids, Long cSize, Long cPage) {
-        IPage<SysUserRole> page = new Page<>();
-        Page<Map<String, String>> rolesOfUsers = userRoleMapper.getRolesOfUsers(ids, page);
+    public List<Map<String, String>> getRolesOfUsers(List<Long> ids) {
+//        IPage<SysUserRole> page = new Page<>();
+        Page<Map<String, String>> rolesOfUsers = userRoleMapper.getRolesOfUsers(ids);
         List<Map<String, String>> records = rolesOfUsers.getRecords();
         return records;
     }
