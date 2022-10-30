@@ -1,0 +1,4 @@
+# Project exclude paths
+/agri-consumer/target/
+/agri-gateway/target/
+/agri-security/target/

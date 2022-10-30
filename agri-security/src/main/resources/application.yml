@@ -1,0 +1,42 @@
+
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+  application:
+    name: security
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  redis:
+    host: 106.15.170.74
+    port: 6379
+    timeout: 100000
+    password: jyjyp123
+#    password: 123456
+#    host: 192.168.122.3
+#    sentinel:
+#      nodes:
+#        - 192.168.122.4:26379
+#        - 192.168.122.5:26379
+#        - 192.168.122.3:26379
+#      password: 123456
+#      master: mymaster
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://106.15.170.74:3306/iyp?serverTimezone=UTC
+    username: jyp
+    password: jyjyp123
+  aop:
+    proxy-target-class: true
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  #日誌
+  global-config:
+    db-config:
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+server:
+  port: 8890
