@@ -1,9 +1,7 @@
 package com.agri.model;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +19,8 @@ public class User {
     /**
      * 用戶id
      */
-    @TableId
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userid;
 
     /**

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
-@MapperScan(value = "com.agri.mapper")
+@MapperScan(value = {"com.agri.mapper", "com.agri.common.upload.mapper"})
 @EnableAspectJAutoProxy
 @EnableMPP
 @EnableDiscoveryClient

@@ -6,8 +6,10 @@ import com.agri.mapper.SysUserMapper;
 import com.agri.mapper.SysUserRoleMapper;
 import com.agri.mapper.UserMapper;
 import com.agri.model.SysUser;
+import com.agri.model.SysUserRole;
 import com.agri.model.User;
 import com.agri.security.model.LoginUser;
+import com.agri.service.ISysUserRoleService;
 import com.agri.service.ISysUserService;
 import com.agri.utils.RedisUtil;
 import com.agri.utils.annotation.lock.Locked;
@@ -25,6 +27,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -51,6 +54,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private SysUserRoleMapper sysUserRoleMapper;
 
     @Resource
+    private ISysUserRoleService userRoleService;
+
+    @Resource
     private BCryptPasswordEncoder passwordEncoder;
 
     @Resource
@@ -66,8 +72,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public IPage<Map<String, String>> getUsersWithType(List<Long> ids, IPage<SysUser> page, Map<String, Object> infos) {
-        IPage<Map<String, String>> usersWithType = sysUserMapper.getUsersWithType(ids, page, infos);
+    public IPage<Map<String, Object>> getUsersWithType(List<Long> ids, IPage<SysUser> page, Map<String, Object> infos) {
+        IPage<Map<String, Object>> usersWithType = sysUserMapper.getUsersWithType(ids, page, infos);
         return usersWithType;
     }
 
@@ -120,21 +126,28 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         for (SysUser user : userList) {
             if( (dupUsers.containsKey(user.getEmail()) && !dupUsers.get(user.getEmail()).equals(user.getUserid()))
                     ||
-                    (dupUsers.containsKey(user.getPhonenumber())) && !dupUsers.get(user.getPhonenumber()).equals(user.getUserid())) {
+                    ((dupUsers.containsKey(user.getPhonenumber())) && !dupUsers.get(user.getPhonenumber()).equals(user.getUserid()))) {
                 duplicate.add(user);
             }else {
                 single.add(user);
-                // 是否是将user禁用
-                if(user.getStatus() == 1) {
-                    forbiddenUsers.add(user.getUserid().toString());
-                }
+                forbiddenUsers.add(user.getUserid().toString());
             }
         }
+        //TODO 如果修改了用户角色，修改用户角色关联表
+        List<SysUserRole> userRoles = new ArrayList<>();
+        for(SysUser user : single) {
+            if(!StringUtils.isEmpty(user.getUserType()))
+                userRoles.add(new SysUserRole(user.getUserid(), Long.valueOf(user.getUserType())));
+        }
+        userRoleService.saveOrUpdateBatch(userRoles);
+//        for(SysUserRole userRole : userRoles) {
+//            sysUserRoleMapper.update(userRole, new QueryWrapper<SysUserRole>().eq("user_id", userRole.getUserId()));
+//        }
         if(single.size() > 0) this.updateBatchById(single);
         if(duplicate.size() > 0) {
             throw new DuplicateUserException(duplicate);
         }
-        // 将禁用用户的缓存删除
+        // 将修改过的用户的缓存删除
         redisUtil.del(forbiddenUsers);
         return single;
     }

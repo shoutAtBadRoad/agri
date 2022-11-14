@@ -129,6 +129,12 @@
             <version>31.1-jre</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>agri-model</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>

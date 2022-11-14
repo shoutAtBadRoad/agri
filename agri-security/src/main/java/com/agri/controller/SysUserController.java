@@ -65,11 +65,17 @@ public class SysUserController {
         userIPage.setSize(size);
         userIPage.setCurrent(page);
         if(ids.size() == 0) {
-            IPage<Map<String, String >> sysUserIPage = iSysUserService.getUsersWithType(null, userIPage, infos);
+            IPage<Map<String, Object >> sysUserIPage = iSysUserService.getUsersWithType(null, userIPage, infos);
 //            List<SysUser> records = sysUserIPage.getRecords();
+            for(Map<String, Object> map : sysUserIPage.getRecords()) {
+                map.put("userid", map.get("userid").toString());
+            }
             return CommonResult.OK(sysUserIPage);
         }else {
-            IPage<Map<String, String>> users = iSysUserService.getUsersWithType(ids, userIPage, infos);
+            IPage<Map<String, Object>> users = iSysUserService.getUsersWithType(ids, userIPage, infos);
+            for(Map<String, Object> map : users.getRecords()) {
+                map.put("userid", map.get("userid").toString());
+            }
             return CommonResult.OK(users);
         }
     }

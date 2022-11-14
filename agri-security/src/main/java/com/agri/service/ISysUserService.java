@@ -22,7 +22,7 @@ public interface ISysUserService extends IService<SysUser> {
 
     List<SysUser> getUsers(List<Long> ids, Long cSize, Long cPage);
 
-    IPage<Map<String, String>> getUsersWithType(List<Long> ids, IPage<SysUser> page, Map<String, Object> params);
+    IPage<Map<String, Object>> getUsersWithType(List<Long> ids, IPage<SysUser> page, Map<String, Object> params);
 
     boolean revisePass(SysUser user, String token);
 

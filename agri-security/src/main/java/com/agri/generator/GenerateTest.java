@@ -49,6 +49,10 @@ public class GenerateTest {
 
         //策略配置
         StrategyConfig strategyConfig = new StrategyConfig();
+
+        //选择要生成的表
+        strategyConfig.setInclude("user_audit_order");
+
         //下划线驼峰命名转换
         strategyConfig.setNaming(NamingStrategy.underline_to_camel);
         strategyConfig.setColumnNaming(NamingStrategy.underline_to_camel);

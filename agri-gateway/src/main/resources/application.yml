@@ -33,4 +33,5 @@ ignore:
   urls:
     - "/user/login"
     - "/*/white/test"
+    - "/static/**"
 

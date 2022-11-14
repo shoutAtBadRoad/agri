@@ -12,7 +12,7 @@
         <module>agri-gateway</module>
         <module>agri-consumer</module>
         <module>agri-security</module>
-        <module>agri-common</module>
+        <module>agri-model</module>
     </modules>
 
     <parent>

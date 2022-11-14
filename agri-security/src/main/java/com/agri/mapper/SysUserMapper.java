@@ -21,6 +21,6 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 
     IPage<SysUser> getUsers(List<Long> ids, IPage<SysUser> page);
 
-    IPage<Map<String, String>> getUsersWithType(List<Long> ids, IPage<SysUser> page, Map<String, Object> params);
+    IPage<Map<String, Object>> getUsersWithType(List<Long> ids, IPage<SysUser> page, Map<String, Object> params);
 
 }
