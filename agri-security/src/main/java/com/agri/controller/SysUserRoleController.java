@@ -39,14 +39,14 @@ public class SysUserRoleController {
      * @return
      */
     @PostMapping("/all")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     public CommonResult getAllRolesOfUser(@RequestBody List<Long> ids) {
         List<Map<String, String>> rolesOfUsers = iSysUserRoleService.getRolesOfUsers(ids);
         return CommonResult.OK(rolesOfUsers);
     }
 
     @PostMapping("/delete")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     public CommonResult deleteRolesOfUser(@RequestBody List<SysUserRole> userRoleList) {
         boolean b = iSysUserRoleService.removeByIds(userRoleList);
         // TODO 删除redis中的用户缓存信息
@@ -59,7 +59,7 @@ public class SysUserRoleController {
     }
 
     @PostMapping("/revise")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     @Transactional
     public CommonResult reviseRolesOfUser(@RequestBody List<SysUserRole> userRoleList) {
         if(userRoleList.size() == 0) {
@@ -80,7 +80,7 @@ public class SysUserRoleController {
     }
 
     @PostMapping("/add")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     public CommonResult addRolesOfUser(@RequestBody List<SysUserRole> userRoleList) {
         boolean b = iSysUserRoleService.saveBatch(userRoleList);
         // TODO 删除redis中的用户缓存信息

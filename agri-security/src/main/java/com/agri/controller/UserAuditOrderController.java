@@ -6,6 +6,7 @@ import com.agri.model.UserAuditOrder;
 import com.agri.security.model.LoginUser;
 import com.agri.service.IUserAuditOrderService;
 import com.agri.utils.PageUtil;
+import com.agri.utils.annotation.SaveAuth;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.log4j.Log4j;
@@ -32,6 +33,7 @@ public class UserAuditOrderController {
     private IUserAuditOrderService service;
 
     @PostMapping("/submit")
+    @SaveAuth(roles = {"farmer"})
     public CommonResult<?> submitOrder(@ApiParam("工单表单")@RequestBody UserAuditOrder order) {
         CommonResult<?> res = null;
         if((res = preCheck(order)) != null) {
@@ -46,6 +48,7 @@ public class UserAuditOrderController {
     }
 
     @PostMapping("/audit")
+    @SaveAuth(roles = {"admin", "coder"})
     public CommonResult<?> auditOrder(@ApiParam("审核后的工单表单")@RequestBody UserAuditOrder order) {
         LoginUser auditor = (LoginUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long auditId = auditor.getUser().getUserid();
@@ -56,6 +59,7 @@ public class UserAuditOrderController {
     }
 
     @PostMapping("/all")
+    @SaveAuth(roles = {"admin", "farmer"})
     public CommonResult<?> getOrder(@ApiParam("获取审核工单的参数")@RequestBody Map<String, Object> params) {
         PageUtil<UserAuditOrder> util = new PageUtil<>();
         IPage<UserAuditOrder> page = null;

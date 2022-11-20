@@ -2,6 +2,8 @@ package com.agri.service.impl;
 
 
 import com.agri.mapper.SysRolePermMapper;
+import com.agri.model.SysPerm;
+import com.agri.model.SysRole;
 import com.agri.model.SysRolePerm;
 import com.agri.model.SysRolePerm;
 import com.agri.service.ISysRolePermService;
@@ -36,4 +38,12 @@ public class SysRolePermServiceImpl extends MppServiceImpl<SysRolePermMapper, Sy
         IPage<Map<String, String>> permsOfRoles = sysRolePermMapper.getPermsOfRoles(ids, page);
         return permsOfRoles;
     }
+
+    @Override
+    public IPage<SysPerm> getPerms(Map<String, Object> queryInfo, IPage<SysPerm> page) {
+        IPage<SysPerm> perms = sysRolePermMapper.getPerms(queryInfo, page);
+        return perms;
+    }
+
+
 }

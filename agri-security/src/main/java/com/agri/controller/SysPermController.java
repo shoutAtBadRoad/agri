@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -45,7 +46,7 @@ public class SysPermController {
     private PermsRolesService permsRolesService;
 
     @PostMapping("/all")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     @ApiOperation(value = "权限信息查询接口", response = List.class)
     public CommonResult getAllPerms(@ApiParam("分页大小") @RequestBody QueryInfo queryInfo) {
         if(queryInfo == null) {
@@ -69,10 +70,8 @@ public class SysPermController {
         return CommonResult.OK(page1);
     }
 
-
-
     @PostMapping("/revise")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     @ApiOperation(value = "权限信息修改接口", response = String.class)
     public CommonResult revisePerms(@ApiParam("传入的权限列表") @RequestBody(required = true) List<SysPerm> permList) {
         CommonResult res = null;
@@ -91,7 +90,7 @@ public class SysPermController {
     }
 
     @PostMapping("/delete")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     @ApiOperation(value = "权限删除列表", response = String.class)
     @Transactional
     public CommonResult deletePerms(@ApiParam("需要删除的权限id列表") @RequestBody List<Long> ids) {
@@ -111,7 +110,7 @@ public class SysPermController {
     }
 
     @PostMapping("/add")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     @ApiOperation(value = "权限添加接口", response = String.class)
     public CommonResult addPerms(@ApiParam("权限列表") @RequestBody List<SysPerm> permList) {
         CommonResult res = null;

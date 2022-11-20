@@ -4,6 +4,7 @@ import com.agri.common.upload.model.ImageInfo;
 import com.agri.common.upload.service.IImageInfoService;
 import com.agri.model.CommonResult;
 import com.agri.utils.RedisUtil;
+import com.agri.utils.annotation.SaveAuth;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,7 @@ public class UploadController {
     private IImageInfoService service;
 
     @PostMapping("/image")
+    @SaveAuth(roles = {"admin", "farmer", "coder", "user"})
     public CommonResult<?> uploadImage(@RequestParam("file")MultipartFile file) {
         String fileName = UUID.randomUUID() + "." + Objects.requireNonNull(file.getContentType())
                 .substring(file.getContentType().lastIndexOf("/") + 1);

@@ -11,4 +11,20 @@
             #{val}
         </foreach>
     </select>
+    <select id="getPerms" resultType="com.agri.model.SysPerm">
+            select * from sys_perm a
+            where true
+            <if test="params.notContain != null" >
+                and a.id not in
+                (
+                    select b.perm_id from sys_role_perm b where b.role_id = #{params.notContain}
+                )
+            </if>
+            <if test="params.contain != null">
+                and a.id in
+                (
+                    select b.perm_id from sys_role_perm b where b.role_id = #{params.contain}
+                )
+            </if>
+    </select>
 </mapper>

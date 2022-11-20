@@ -29,7 +29,7 @@ public class SmsController {
 
     @GetMapping("/send/code")
     @ApiOperation(value = "短信验证码发送接口", response = String.class)
-    @SaveAuth
+    @SaveAuth(roles = {"admin", "coder", "user", "farmer", "guest"})
     public CommonResult<String> getSmsCode(@ApiParam("手机号") @RequestParam String phoneNumber) {
         // 检查手机号
         if(StringUtils.isEmpty(phoneNumber))

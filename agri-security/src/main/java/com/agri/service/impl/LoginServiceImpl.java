@@ -4,6 +4,7 @@ import com.agri.config.SecurityConfig;
 import com.agri.controller.LoginController;
 import com.agri.exception.AccountException;
 import com.agri.exception.BeyondLoginTimeException;
+import com.agri.exception.UnAuthorizedException;
 import com.agri.filter.jwtfilter.RenewalJwtHandler;
 import com.agri.model.LoginType;
 import com.agri.model.RedisConstant;
@@ -60,7 +61,7 @@ public class LoginServiceImpl implements LoginService {
     HttpServletRequest request;
 
     @Override
-    public String loginReturnToken(String username, String password) throws AuthenticationException, NoSuchPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+    public String loginReturnToken(String username, String password) throws UnAuthorizedException, AuthenticationException, NoSuchPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
         //TODO 等前端的密码使用AES加密后，这里的密码就需要解一下密
 //        password = AESUtil.decryptAES(password.getBytes());
         String ipAddress = UriUtil.getIpAddress(request);
@@ -94,7 +95,7 @@ public class LoginServiceImpl implements LoginService {
         // 存儲redis
         redisUtil.set(id, loginUser);
         redisUtil.set(jwt, jwt, RenewalJwtHandler.DEFAULT_EXPIRE_TIME);
-
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities()));
         return jwt;
     }
 

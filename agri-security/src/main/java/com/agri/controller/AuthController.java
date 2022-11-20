@@ -41,7 +41,7 @@ public class AuthController {
      */
     @PostMapping("/apiAuth")
     @ApiOperation(value = "权限校验接口", response = Boolean.class)
-    @SaveAuth
+    @SaveAuth(roles = {"admin", "coder", "guest", "user", "farmer"})
     public CommonResult<Boolean> authenticationApi(@ApiParam("进行校验的uri") @RequestParam("uri") String uri) {
         // 拿到用户信息
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

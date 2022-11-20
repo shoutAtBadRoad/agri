@@ -139,10 +139,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             if(!StringUtils.isEmpty(user.getUserType()))
                 userRoles.add(new SysUserRole(user.getUserid(), Long.valueOf(user.getUserType())));
         }
-        userRoleService.saveOrUpdateBatch(userRoles);
-//        for(SysUserRole userRole : userRoles) {
-//            sysUserRoleMapper.update(userRole, new QueryWrapper<SysUserRole>().eq("user_id", userRole.getUserId()));
-//        }
+//        userRoleService.saveOrUpdateBatch(userRoles);
+        for(SysUserRole userRole : userRoles) {
+            int i = sysUserRoleMapper.update(userRole, new QueryWrapper<SysUserRole>().eq("user_id", userRole.getUserId()));
+            if(i == 0) {
+                sysUserRoleMapper.insert(userRole);
+            }
+        }
         if(single.size() > 0) this.updateBatchById(single);
         if(duplicate.size() > 0) {
             throw new DuplicateUserException(duplicate);

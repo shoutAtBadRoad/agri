@@ -43,7 +43,7 @@ public class SysRoleController {
     private PermsRolesService permsRolesService;
 
     @PostMapping("/all")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     public CommonResult  getAllRoles(@RequestBody QueryInfo info) {
         QueryWrapper<SysRole> wrapper = null;
         if(!StringUtils.isEmpty(info.getObscure())) {
@@ -68,7 +68,7 @@ public class SysRoleController {
     }
 
     @PostMapping("/revise")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     public CommonResult reviseRoles(@RequestBody List<SysRole> roleList) {
         long updateId = ((LoginUser)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser().getUserid();
         for (SysRole sysRole : roleList) {
@@ -79,7 +79,7 @@ public class SysRoleController {
     }
 
     @PostMapping("/delete")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     @Transactional
     public CommonResult deleteRoles(@RequestBody List<Long> ids) {
 //        List<SysRolePerm> roleId = iSysRolePermService.list(new QueryWrapper<SysRolePerm>().in("roleId", ids));
@@ -93,7 +93,7 @@ public class SysRoleController {
     }
 
     @PostMapping("/add")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     public CommonResult addRoles(@RequestBody List<SysRole> roleList) {
         LoginUser user = (LoginUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         for (SysRole sysRole : roleList) {

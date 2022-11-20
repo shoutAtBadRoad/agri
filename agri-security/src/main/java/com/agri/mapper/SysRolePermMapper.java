@@ -1,6 +1,7 @@
 package com.agri.mapper;
 
 
+import com.agri.model.SysPerm;
 import com.agri.model.SysRolePerm;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -24,5 +25,5 @@ public interface SysRolePermMapper extends MppBaseMapper<SysRolePerm> {
 
     IPage<Map<String, String >> getPermsOfRoles(@Param("ids") List<Long> ids, IPage<?> page);
 
-
+    IPage<SysPerm> getPerms(@Param("params") Map<String,Object> queryInfo, IPage<?> page);
 }

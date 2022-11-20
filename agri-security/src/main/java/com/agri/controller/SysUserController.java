@@ -5,7 +5,9 @@ import com.agri.exception.DuplicateUserException;
 import com.agri.model.CommonResult;
 import com.agri.model.ResultStatus;
 import com.agri.model.SysUser;
+import com.agri.model.SysUserRole;
 import com.agri.security.model.LoginUser;
+import com.agri.service.ISysUserRoleService;
 import com.agri.service.ISysUserService;
 import com.agri.utils.annotation.AESUtil;
 import com.agri.utils.annotation.SaveAuth;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,7 +89,7 @@ public class SysUserController {
      * @return
      */
     @PostMapping("/revise")
-    @SaveAuth
+    @SaveAuth(roles = {"admin", "coder", "farmer", "user"})
     public CommonResult reviseUsers(@RequestBody List<SysUser> userList) {
         if(Objects.isNull(userList) || userList.size() == 0) {
             return CommonResult.OK("没有要修改的对象");
@@ -112,21 +115,32 @@ public class SysUserController {
      * @return
      */
     @PostMapping("/delete")
-    @SaveAuth(roles = {"admin"})
+    @SaveAuth(roles = {"admin", "coder"})
     public CommonResult deleteUsers(@RequestBody List<Long> ids) {
         iSysUserService.removeByIds(ids);
         return CommonResult.OK("删除成功");
     }
 
+    @Resource
+    private ISysUserRoleService userRoleService;
+
     /**
      * 适用于管理员后台创建账号
      * @return
      */
+    @Transactional
     @PostMapping("/add")
-    @SaveAuth(roles = {"admin"})
-    public CommonResult addUsers(@RequestBody List<SysUser> userList) {
-        if(iSysUserService.addUsers(userList))
+    @SaveAuth(roles = {"admin", "coder"})
+    public CommonResult<?> addUsers(@RequestBody List<SysUser> userList) {
+        if(iSysUserService.addUsers(userList)) {
+            // 添加用户角色关系
+            List<SysUserRole> list = new ArrayList<>();
+            userList.forEach(user -> {
+                list.add(new SysUserRole(user.getUserid(), Long.valueOf(user.getUserType())));
+                userRoleService.saveBatch(list);
+            });
             return CommonResult.OK("创建成功");
+        }
         else
             return CommonResult.error("添加失败");
     }
@@ -137,7 +151,7 @@ public class SysUserController {
      * @return
      */
     @PostMapping("/revisePass")
-    @SaveAuth
+    @SaveAuth(roles = {"admin", "coder", "farmer", "user"})
     public CommonResult revisePass(@RequestBody SysUser user, HttpServletRequest request) {
         //TODO 先AES解密
 //        byte[] bytes = user.getPassword().getBytes();
@@ -158,11 +172,27 @@ public class SysUserController {
      * @return
      */
     @PostMapping("/aes")
+    @SaveAuth(roles = {"admin", "coder", "farmer", "user"})
     public CommonResult getAESKeyAndIV() {
         Map<String, String> map = new HashMap<>();
         map.put("key", AESUtil.KEY);
         map.put("iv", AESUtil.IV);
         return CommonResult.OK(map);
+    }
+
+    @PostMapping("/count")
+    @SaveAuth(roles = {"admin", "coder", "farmer", "user"})
+    public CommonResult<?> getCount(@RequestBody Map<String, Object> queryInfo) {
+        QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
+        String phone = null, email = null;
+        if((phone = (String) queryInfo.get("phonenumber")) != null) {
+            wrapper.eq("phonenumber", phone);
+        }
+        if((email = (String) queryInfo.get("email")) != null) {
+            wrapper.eq("email", email);
+        }
+        int count = iSysUserService.count(wrapper);
+        return CommonResult.OK(count);
     }
 
 }

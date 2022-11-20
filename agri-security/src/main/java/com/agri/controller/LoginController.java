@@ -4,6 +4,7 @@ package com.agri.controller;
 
 import com.agri.exception.AccountException;
 import com.agri.exception.BeyondLoginTimeException;
+import com.agri.exception.UnAuthorizedException;
 import com.agri.model.*;
 import com.agri.service.LoginService;
 import com.agri.utils.annotation.SaveAuth;
@@ -38,13 +39,14 @@ public class LoginController {
      */
     public static final ThreadLocal<Integer> loginMethod = new ThreadLocal<>();
 
+    public static final ThreadLocal<String> AppType = new ThreadLocal<>();
+
     @Autowired
     @Qualifier(value = "loginServiceImpl")
     private LoginService loginService;
 
     @PostMapping("/login")
     @ApiOperation(value = "登录接口", response = String.class)
-    @SaveAuth
     public CommonResult login(@ApiParam("用户名和密码") @RequestBody User user) {
         try {
             // 记录登陆方式
@@ -67,6 +69,8 @@ public class LoginController {
         }catch (AuthenticationException a) {
             // 未找到匹配的用户名和密码
             return CommonResult.create(ResultStatus.PASS_WRONG, a.getMessage());
+        }catch (UnAuthorizedException unAuthorizedException) {
+            return CommonResult.create(ResultStatus.UNAUTHORIZED, unAuthorizedException.getReason());
         }
         // 这里捕获的是AES加密中的异常，视情况处理即可
         catch (Exception e) {
@@ -78,7 +82,7 @@ public class LoginController {
 
     @PostMapping("/logout")
     @ApiOperation(value = "注销接口", response = String.class)
-    @SaveAuth
+    @SaveAuth(roles = {"admin", "coder", "user", "farmer", "guest"})
     public CommonResult<Object> logout(HttpServletRequest request) {
         String logout = loginService.logtout(request);
         return CommonResult.OK(logout);
@@ -86,7 +90,6 @@ public class LoginController {
 
     @PostMapping("/sms/login")
     @ApiOperation(value = "短信验证码登陆")
-    @SaveAuth
     public CommonResult loginViaSms(@ApiParam("手机号") @RequestBody SysUser user, @ApiParam("验证码") String code) {
         String phoneNumber = user.getPhonenumber();
         if(StringUtils.isEmpty(phoneNumber)){
@@ -113,7 +116,10 @@ public class LoginController {
             return res;
         }catch (AuthenticationException | BadCredentialsException a) {
             return CommonResult.create(ResultStatus.PASS_WRONG, a.getMessage());
-        } catch (Exception e) {
+        }catch (UnAuthorizedException unAuthorizedException) {
+            return CommonResult.create(ResultStatus.UNAUTHORIZED, unAuthorizedException.getReason());
+        }
+        catch (Exception e) {
             return CommonResult.create(ResultStatus.ERROR, "内部错误");
         }finally {
             loginMethod.remove();
@@ -122,7 +128,6 @@ public class LoginController {
 
     @PostMapping("/phone/login")
     @ApiOperation(value = "手机号密码登陆")
-    @SaveAuth
     public CommonResult loginViaSms(@ApiParam("手机号和密码") @RequestBody SysUser user) {
         String phoneNumber = user.getPhonenumber(), password = user.getPassword();
         if(StringUtils.isEmpty(phoneNumber) || StringUtils.isEmpty(password)){
@@ -146,7 +151,10 @@ public class LoginController {
             return res;
         }catch (AuthenticationException a) {
             return CommonResult.create(ResultStatus.PASS_WRONG, a.getMessage());
-        } catch (Exception e) {
+        }catch (UnAuthorizedException unAuthorizedException) {
+            return CommonResult.create(ResultStatus.UNAUTHORIZED, unAuthorizedException.getReason());
+        }
+        catch (Exception e) {
             return CommonResult.create(ResultStatus.ERROR, "内部错误");
         }finally {
             loginMethod.remove();
